@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.*;
 import java.lang.*;
 
-enum TypeFichier{TEXT, HYBRID, COMPRESSED_DATA, IDK};
+enum FileType{TEXT, HYBRID, COMPRESSED_DATA, IDK};
 
 public class CSP {
 	public static boolean VERB=true;
@@ -44,24 +44,24 @@ public class CSP {
 		return (wrong==0)&&(missing==0);
 	}
 	
-	public static double compressionRate(String depart, String arrivée){
-		double taux=100-(double)tailleDe(arrivée)/tailleDe(depart)*100;
-		System.out.printf("taux de compression : %.1f%s\n",taux,"%");
-		return taux;
+	public static double compressionRate(String depart, String input){
+		double rate=100-(double)sizeOf(input)/sizeOf(depart)*100;
+		System.out.printf("taux de compression : %.1f%s\n",rate,"%");
+		return rate;
 	}
 	
-	public static int tailleDe(String ad){
-		int taille=0;
+	public static int sizeOf(String ad){
+		int size=0;
 		try{
 			FileInputStream f= new FileInputStream(ad);
 			BufferedInputStream b=new BufferedInputStream(f);
-			while(b.read()!=-1)taille++;
+			while(b.read()!=-1)size++;
 			b.close();
 		}
 		catch(IOException e){
 			System.err.println(e);
 		}
-		return taille;
+		return size;
 	}
 	
 	public static void testerTout(boolean sauver){
@@ -87,24 +87,24 @@ public class CSP {
 		}
 	}
 	
-	public static TypeFichier typeOf(String ad){
+	public static FileType typeOf(String ad){
 		double [] t=analyserFichier(ad);
 		if(t==null)
-			return TypeFichier.IDK;
+			return FileType.IDK;
 		
 		if(t[SPACE]>10 && t[LETTER]>60)
-			return TypeFichier.TEXT;
+			return FileType.TEXT;
 		if(t[SPACE]>5 && t[LETTER]>30)
-			return TypeFichier.HYBRID;
+			return FileType.HYBRID;
 		if(Math.abs(t[AVERAGE]-Byte.MAX_VALUE)<5 && Math.abs(t[AVG_DIFF]-Byte.MAX_VALUE/2-10)<3)
-			return TypeFichier.COMPRESSED_DATA;
-		return TypeFichier.IDK;
+			return FileType.COMPRESSED_DATA;
+		return FileType.IDK;
 	}
 	
 	private static double[] analyserFichier(String ad){
 		try{
 			int sizeMax=2000;
-			int taille=tailleDe(ad);
+			int size=sizeOf(ad);
 			RandomAccessFile r=new RandomAccessFile(ad,"r");
 			
 			int c;
@@ -112,7 +112,7 @@ public class CSP {
 			double letters=0, spaces=0, avg=0, std_dev=0;
 			Set<Integer> s=new HashSet<Integer>();
 			for(int i=0;i<sizeMax;i++){
-				r.seek((long)(Math.random()*taille));
+				r.seek((long)(Math.random()*size));
 				c=r.read();
 				s.add(c);
 				avg+=c;
@@ -179,8 +179,8 @@ public class CSP {
 		boolean continuer=true;
 		while(continuer){
 			System.out.print(">> ");
-			String commande=sc.nextLine();
-			String[] commands =commande.split(" ");
+			String command=sc.nextLine();
+			String[] commands =command.split(" ");
 			if(commands[0].equals("sys")){
 				try{
 					StringBuffer strB=new StringBuffer();
@@ -193,16 +193,14 @@ public class CSP {
 					while ((s = br.readLine()) != null)
 		                System.out.println(s);
 		            p.destroy();
-					//Runtime.getRuntime().exec(strB.toString());
 				}
 				catch(Exception e){
-					System.out.println("ERREUR DU SYSTEME "+e);
+					System.out.println("Error "+e);
 				}
 			}
 			else{
 				switch(commands.length){
 				case 0:
-					System.out.println("SAISIE NON VALIDE");
 					break;
 				case 1:
 					if(commands[0].equals("q")||commands[0].equals("Q")){
@@ -213,7 +211,7 @@ public class CSP {
 					}
 					else if(commands[0].equals("ts")){
 						long tps=-System.currentTimeMillis();
-						System.out.print("Enregistrement dans \"bilan.log\"...");
+						System.out.print("Recorded in \"bilan.log\"...");
 						testerTout(true);
 						tps+=System.currentTimeMillis();
 						System.out.println("OK ("+tps+"ms)");
@@ -240,25 +238,23 @@ public class CSP {
 					else if(commands[0].equals("rn")){
 						try{
 							Runtime.getRuntime().exec("cp -r te/test .");
-							System.out.println("Dossier de test renouvellÃ©");
 						}
 						catch(Exception e){
-							System.out.println("Erreur systeme "+e);
+							System.out.println("Error "+e);
 						}
 						
 					}
 					else if(commands[0].equals("rnlog")){
 						try{
 							Runtime.getRuntime().exec("rm bilan.log");
-							System.out.println("log renouvellÃ©");
 						}
 						catch(IOException e){
-							System.out.println("Erreur systeme");
+							System.out.println("Error");
 						}
 						
 					}
 					else{
-						System.out.println("SAISIE NON VALIDE");
+						System.out.println("Bad entry");
 					}
 					break;
 				case 2:
@@ -266,34 +262,29 @@ public class CSP {
 						System.out.print("Type de "+commands[1]);
 						switch(typeOf(commands[1])){
 						case TEXT:
-							System.out.println(" : Texte");
+							System.out.println(" : Text");
 							break;
 						case HYBRID:
-							System.out.println(" : Hybride");
+							System.out.println(" : Hybrid");
 							break;
 						case COMPRESSED_DATA:
-							System.out.println(" : Données compressées");
+							System.out.println(" : Compressed data");
 							break;
 						case IDK:
-							System.out.println(" : Inconnu");
+							System.out.println(" : idk");
 							break;
 						}
 					}
 					else if(commands[0].equals("bav")){
 						if(commands[1].equals("0")){
 							VERB=false;
-							System.out.println("Le mode bavard est désactivé");
 						}
 						else{
 							VERB=true;
-							System.out.println("Le mode bavard est activé");
 						}
 					}
-					else if(commands[0].equals("conseil")){
-						conseiller(commands[1]);
-					}
-					else if(commands[0].equals("taille")){
-						System.out.println("Taille de "+commands[0]+" "+tailleDe(commands[1]));
+					else if(commands[0].equals("size")){
+						System.out.println("sieze of "+commands[0]+" "+sizeOf(commands[1]));
 					}
 					else if(commands[0].equals("erl")){
 						RLE rc=new RLE(commands[1]);
@@ -312,11 +303,11 @@ public class CSP {
 //						dc.estimationComp();
 //					}
 					else{
-						System.out.println("SAISIE NON VALIDE");
+						System.out.println("bad entry");
 					}
 					break;
 				case 3:
-					if(commands[0].equals("ident")){
+					if(commands[0].equals("same")){
 						isTheSame(commands[1],commands[2]);
 					}
 					else if(commands[0].equals("crl")){
@@ -345,7 +336,7 @@ public class CSP {
 //					}
 					break;
 				default:
-					System.out.println("SAISIE NON VALIDE");
+					System.out.println("bad entry");
 				}
 			}
 		}

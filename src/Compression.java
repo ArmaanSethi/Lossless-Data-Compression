@@ -4,10 +4,10 @@ import java.io.*;
 public abstract class Compression {
 	protected String _input;
 	
-	public abstract void compresser(String fin, boolean v);
-	public abstract void decompresser(String fin, boolean v);
+	public abstract void compresser(String in, boolean v);
+	public abstract void decompresser(String in, boolean v);
 	public double estimationComp(){
-		System.out.println("Aucune estimation disponible");
+		System.out.println("No estimate implemented");
 		return 0.;
 	}
 	public abstract void init();
@@ -29,7 +29,7 @@ public abstract class Compression {
 		}
 	}
 	
-	public static int string2Int(String str){// avec str en convention unsigned
+	public static int string2Int(String str){//   convention unsigned
 		if(str.charAt(0)=='0')return Integer.parseInt(str,2);
 		else{
 			return (int) (Integer.parseInt(	str.substring(1),2)-Integer.MAX_VALUE-1);
@@ -48,16 +48,16 @@ public abstract class Compression {
 	
 	public void testerTout(boolean v){
 		String rep="test/";
-		String fich[]={"c.pak","e.m4a","h.html","j.jpg","p.pptx","s.so","x.xcf","k.html"};
-		for(String s :fich)
+		String file[]={"c.pak","e.m4a","h.html","j.jpg","p.pptx","s.so","x.xcf","k.html"};
+		for(String s :file)
 			tester(rep+s,rep+"2"+s,v);
 	}
 	
 	public void testerToutTexte(boolean v){
 		String rep="test/";
-		String fich[]={"c.pak","e.m4a","h.html","j.jpg","p.pptx","s.so","x.xcf","k.html"};
-		for(String s :fich)
-			if(CSP.typeOf(rep+s)==TypeFichier.TEXT)tester(rep+s,rep+"2"+s,v);
+		String file[]={"c.pak","e.m4a","h.html","j.jpg","p.pptx","s.so","x.xcf","k.html"};
+		for(String s :file)
+			if(CSP.typeOf(rep+s)==FileType.TEXT)tester(rep+s,rep+"2"+s,v);
 	}
 	
 	public String getDepart(){
