@@ -154,28 +154,26 @@ public class RLE extends Compression{
 		throw new NullPointerException(" ("+_byte+")");
 	}
 	
-	public void decompresser(String fin, boolean v){
+	public void decompresser(String input, boolean v){
 		long time_passed=-System.currentTimeMillis();
 		if(v){
 			System.out.println("-------- Decompression------");
 			System.out.println("Of                    : "+_input);
-			System.out.println("To                  : "+fin);
+			System.out.println("To                  : "+input);
 			System.out.println("Method               : Run length");
 		}
 		try{
 			BufferedInputStream readFlow=new BufferedInputStream(new FileInputStream(_input));
-			BufferedOutputStream fluxEcriture=new BufferedOutputStream(new FileOutputStream(fin));
+			BufferedOutputStream writeFlow=new BufferedOutputStream(new FileOutputStream(input));
 			
 			_byte=readFlow.read();
-			if(v)System.out.println("OK ("+_byte+")");
-			if(v)System.out.print(">> Neutre...               ");
 			byte[] buff=new byte[_byte];
 			readFlow.read(buff);
-			byte[] neutre=new byte[_byte];
+			byte[] same=new byte[_byte];
 			if(v)System.out.print("OK ( [");
 			for(int i=0;i<_byte;i++){
-				neutre[i]=buff[i];
-				System.out.print(" "+neutre[i]);
+				same[i]=buff[i];
+				System.out.print(" "+same[i]);
 			}
 			System.out.println(" ] )");
 			
@@ -184,29 +182,29 @@ public class RLE extends Compression{
 				int i=0;
 				boolean different=false;
 				while(i<_byte && !different){
-					if(buff[i]!=neutre[i])
+					if(buff[i]!=same[i])
 						different=true;
 					i++;
 				}
 				if(different){
-					fluxEcriture.write(buff);
+					writeFlow.write(buff);
 				}
 				else{
 					int nb=readFlow.read();
 					readFlow.read(buff);
 					for(int j=0;j<nb;j++)
-						fluxEcriture.write(buff);
+						writeFlow.write(buff);
 				}
 			}
 			if(nbLu==-1){
-				fluxEcriture.write(buff);
+				writeFlow.write(buff);
 			}
 			else if(nbLu!=_byte)
 				for(int i=0;i<nbLu;i++)
-					fluxEcriture.write(buff[i]);
+					writeFlow.write(buff[i]);
 			
 			readFlow.close();
-			fluxEcriture.close();
+			writeFlow.close();
 			if(v) System.out.println("OK");
 			time_passed+=System.currentTimeMillis();
 			System.out.println("It took "+time_passed+" ms");
